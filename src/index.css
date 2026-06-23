@@ -2,38 +2,45 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-/* Dark theme (default) */
+/* Dark theme (default) — deep modern dark */
 :root {
-  --bg-page: #0A0F0A;
-  --bg-surface: #0F1A0F;
-  --bg-elevated: #162016;
-  --border: #1F2E1F;
-  --text-primary: #E8F5E8;
-  --text-secondary: #7A9A7A;
-  --text-muted: #4A6A4A;
-  --green-400: #39E516;
-  --green-500: #30BF12;
-  --green-600: #207F0C;
-  --green-700: #104006;
-  --amber: #F59E0B;
-  --red: #EF4444;
-  --gray: #6B7280;
-  --blue: #3B82F6;
+  --bg-page:     #111113;
+  --bg-surface:  #1A1A1E;
+  --bg-elevated: #222228;
+  --border:      #2C2C34;
+  --border-subtle: #232329;
+  --text-primary:   #FFFFFF;
+  --text-secondary: #9898A6;
+  --text-muted:     #5A5A6E;
+  --green-neon:  #A8E63D;
+  --green-400:   #A8E63D;
+  --green-500:   #85C41C;
+  --green-600:   #5C8A10;
+  --green-700:   #2E4508;
+  --amber:  #F59E0B;
+  --red:    #EF4444;
+  --orange: #F97316;
+  --gray:   #6B7280;
+  --blue:   #3B82F6;
+  --card-glow: 0 0 0 1px var(--border);
 }
 
-/* Light theme */
+/* Light theme — clean & crisp */
 :root.light {
-  --bg-page: #F4F7F4;
-  --bg-surface: #FFFFFF;
-  --bg-elevated: #F0F4F0;
-  --border: #D1DDD1;
-  --text-primary: #0F1A0F;
-  --text-secondary: #4A6A4A;
-  --text-muted: #7A9A7A;
-  --green-400: #30BF12;
-  --green-500: #207F0C;
-  --green-600: #104006;
-  --green-700: #082003;
+  --bg-page:     #F2F2F5;
+  --bg-surface:  #FFFFFF;
+  --bg-elevated: #EBEBF0;
+  --border:      #DDDDE8;
+  --border-subtle: #E8E8F0;
+  --text-primary:   #111118;
+  --text-secondary: #5A5A72;
+  --text-muted:     #9898A6;
+  --green-neon:  #6AAB0E;
+  --green-400:   #6AAB0E;
+  --green-500:   #4E8409;
+  --green-600:   #345805;
+  --green-700:   #1A2C02;
+  --card-glow: 0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px var(--border);
 }
 
 html, body {
