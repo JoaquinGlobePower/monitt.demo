@@ -68,6 +68,14 @@ function AlertRow({ alert, showToast, navigate, last }) {
   const Icon = cfg.icon
   const isActive = alert.status === 'active'
 
+  // Resolved rows use neutral/muted styling throughout
+  const iconColor   = isActive ? cfg.color : 'var(--text-muted)'
+  const iconBg      = isActive ? cfg.bg    : 'var(--bg-elevated)'
+  const badgeColor  = isActive ? cfg.color : 'var(--text-muted)'
+  const badgeBg     = isActive ? cfg.bg    : 'var(--bg-elevated)'
+  const rowBg       = isActive && alert.severity !== 'info' ? cfg.bg : 'transparent'
+  const titleColor  = isActive ? 'var(--text-primary)' : 'var(--text-secondary)'
+
   return (
     <div style={{
       display: 'grid',
@@ -76,19 +84,20 @@ function AlertRow({ alert, showToast, navigate, last }) {
       gap: '16px',
       padding: '14px 20px',
       borderBottom: last ? 'none' : '1px solid var(--border)',
-      background: isActive && alert.severity !== 'info' ? `${cfg.bg}` : 'transparent',
+      background: rowBg,
+      opacity: isActive ? 1 : 0.6,
     }}>
       {/* Severity icon */}
       <div style={{
-        width: '28px', height: '28px', borderRadius: '6px', background: cfg.bg,
+        width: '28px', height: '28px', borderRadius: '6px', background: iconBg,
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
       }}>
-        <Icon size={14} style={{ color: cfg.color }} />
+        <Icon size={14} style={{ color: iconColor }} />
       </div>
 
       {/* Description */}
       <div>
-        <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', margin: '0 0 2px' }}>{alert.title}</p>
+        <p style={{ fontSize: '13px', fontWeight: 500, color: titleColor, margin: '0 0 2px' }}>{alert.title}</p>
         <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
           {alert.asset} · {alert.location}
         </p>
@@ -96,8 +105,8 @@ function AlertRow({ alert, showToast, navigate, last }) {
 
       {/* Severity badge */}
       <span style={{
-        fontSize: '11px', fontWeight: 600, color: cfg.color,
-        background: cfg.bg, padding: '3px 8px', borderRadius: '4px', width: 'fit-content',
+        fontSize: '11px', fontWeight: 600, color: badgeColor,
+        background: badgeBg, padding: '3px 8px', borderRadius: '4px', width: 'fit-content',
       }}>
         {cfg.label}
       </span>
@@ -106,9 +115,9 @@ function AlertRow({ alert, showToast, navigate, last }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         {isActive
           ? <Clock size={12} style={{ color: '#F59E0B' }} />
-          : <CheckCircle size={12} style={{ color: '#30BF12' }} />
+          : <CheckCircle size={12} style={{ color: 'var(--text-muted)' }} />
         }
-        <span style={{ fontSize: '12px', color: isActive ? '#F59E0B' : '#30BF12' }}>
+        <span style={{ fontSize: '12px', color: isActive ? '#F59E0B' : 'var(--text-muted)' }}>
           {isActive ? 'Activa' : 'Resuelta'}
         </span>
       </div>
@@ -121,11 +130,11 @@ function AlertRow({ alert, showToast, navigate, last }) {
         onClick={() => alert.demoTarget ? navigate(alert.demoTarget) : showToast('Vista de detalle no disponible en esta demo.')}
         style={{
           display: 'flex', alignItems: 'center', gap: '4px',
-          background: alert.demoTarget ? cfg.bg : 'none',
-          border: `1px solid ${isActive && alert.severity !== 'info' ? cfg.color : 'var(--border)'}`,
+          background: 'none',
+          border: `1px solid ${isActive && alert.demoTarget ? cfg.color : 'var(--border)'}`,
           borderRadius: '6px', padding: '5px 10px',
-          color: isActive && alert.severity !== 'info' ? cfg.color : 'var(--text-secondary)',
-          fontSize: '12px', fontWeight: alert.demoTarget ? 600 : 400,
+          color: isActive && alert.demoTarget ? cfg.color : 'var(--text-muted)',
+          fontSize: '12px', fontWeight: isActive && alert.demoTarget ? 600 : 400,
           cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
         }}
       >
