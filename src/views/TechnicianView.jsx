@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Bell, MapPin, ChevronDown, ChevronUp } from 'lucide-react'
+import { CheckCircle, MapPin, Clock, Sparkles, ChevronRight, AlertTriangle } from 'lucide-react'
 
 const CHECKLIST = [
   'Verificar nivel de aceite en varilla medidora',
@@ -10,185 +9,182 @@ const CHECKLIST = [
   'Registrar lectura de presión post-intervención',
 ]
 
+const STATUS_STEPS = [
+  { label: 'Solicitud enviada',   done: true  },
+  { label: 'Técnico asignado',    done: true  },
+  { label: 'En camino',           done: true, active: true },
+  { label: 'Intervención',        done: false },
+  { label: 'Cierre',              done: false },
+]
+
 export default function TechnicianView({ navigate }) {
-  const [checked, setChecked] = useState(Array(CHECKLIST.length).fill(false))
-  const [historyOpen, setHistoryOpen] = useState(false)
-  const allChecked = checked.every(Boolean)
-
-  const toggle = (i) => setChecked(prev => prev.map((v, idx) => idx === i ? !v : v))
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 24px', minHeight: '100%', background: 'var(--bg-page)' }}>
-      {/* Label */}
-      <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '20px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-        Vista del técnico — Luis Ponce
-      </p>
+    <div style={{ padding: '32px', maxWidth: '820px', margin: '0 auto' }}>
 
-      {/* Phone frame */}
+      {/* Confirmation banner */}
       <div style={{
-        width: '390px',
-        maxWidth: '100%',
-        borderRadius: '44px',
-        background: '#0A0F0A',
-        border: '10px solid #1a1a1a',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px #333',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        maxHeight: '820px',
-        position: 'relative',
+        display: 'flex', alignItems: 'center', gap: '14px',
+        background: 'rgba(48,191,18,0.06)', border: '1px solid rgba(48,191,18,0.2)',
+        borderRadius: '10px', padding: '16px 20px', marginBottom: '28px',
       }}>
-        {/* Notch */}
-        <div style={{ height: '32px', background: '#0A0F0A', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', paddingBottom: '4px', flexShrink: 0 }}>
-          <div style={{ width: '120px', height: '24px', background: '#111', borderRadius: '0 0 16px 16px' }} />
+        <div style={{
+          width: '36px', height: '36px', borderRadius: '50%',
+          background: 'rgba(48,191,18,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <CheckCircle size={18} style={{ color: 'var(--green-500)' }} />
+        </div>
+        <div>
+          <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 2px' }}>
+            Solicitud enviada correctamente
+          </p>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
+            Monitt recibió tu solicitud y asignó al técnico Luis Ponce. Te notificaremos cuando complete la visita.
+          </p>
+        </div>
+      </div>
+
+      {/* Header */}
+      <div style={{ marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px' }}>
+          Resumen del caso
+        </h1>
+        <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>Orden de servicio #001 · GEN-002</p>
+      </div>
+
+      {/* Two-column: case info + status */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+
+        {/* Case summary */}
+        <div style={{
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderRadius: '10px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px',
+        }}>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Detalle del caso</p>
+
+          <div>
+            <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 2px' }}>GEN-002 — Generador Diésel 350 kVA</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <MapPin size={11} style={{ color: 'var(--text-muted)' }} />
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Bodega Sur — San Bernardo</span>
+            </div>
+          </div>
+
+          <div style={{ paddingTop: '12px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {[
+              { label: 'Motivo',      value: 'Anomalía en sistema de lubricación' },
+              { label: 'Prioridad',   value: 'Alta', red: true },
+              { label: 'Técnico',     value: 'Luis Ponce (asignado por Monitt)' },
+              { label: 'Solicitado',  value: '25 may 2026, 09:41' },
+            ].map(({ label, value, red }) => (
+              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', flexShrink: 0 }}>{label}</span>
+                <span style={{ fontSize: '12px', fontWeight: 500, color: red ? '#EF4444' : 'var(--text-secondary)', textAlign: 'right' }}>{value}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Top bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 20px 12px', flexShrink: 0 }}>
-          <span style={{ fontSize: '16px', fontWeight: 700, color: '#E8F5E8', letterSpacing: '-0.5px' }}>monitt</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 500, color: '#7A9A7A' }}>Orden #001</span>
-            <Bell size={18} style={{ color: '#7A9A7A' }} />
-          </div>
-        </div>
-
-        {/* Scrollable content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px', paddingBottom: '80px' }}>
-          {/* Work order card */}
-          <div style={{ background: '#0F1A0F', border: '1px solid #1F2E1F', borderRadius: '12px', padding: '16px', marginBottom: '12px' }}>
-            <p style={{ fontSize: '18px', fontWeight: 700, color: '#E8F5E8', margin: '0 0 2px' }}>GEN-002</p>
-            <p style={{ fontSize: '14px', color: '#7A9A7A', margin: '0 0 12px' }}>Bodega Sur, San Bernardo</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <MapPin size={14} style={{ color: '#4A6A4A' }} />
-              <span style={{ fontSize: '12px', color: '#4A6A4A' }}>Av. Portales 4820, San Bernardo</span>
-            </div>
-            <button style={{
-              display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '6px',
-              border: '1px solid #1F2E1F', background: 'transparent', color: '#7A9A7A',
-              fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', marginBottom: '12px',
-            }}>
-              <MapPin size={12} /> Abrir en Maps
-            </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3B82F6' }} />
-              <span style={{ fontSize: '13px', fontWeight: 500, color: '#3B82F6' }}>EN CAMINO</span>
-            </div>
-          </div>
-
-          {/* Fault description */}
-          <div style={{ background: '#0F1A0F', border: '1px solid #1F2E1F', borderLeft: '3px solid #F59E0B', borderRadius: '12px', padding: '14px', marginBottom: '12px' }}>
-            <p style={{ fontSize: '12px', color: '#7A9A7A', margin: '0 0 6px' }}>Falla detectada</p>
-            <p style={{ fontSize: '13px', color: '#E8F5E8', margin: 0, lineHeight: 1.6 }}>
-              Anomalía en sistema de lubricación. Presión de aceite: <strong style={{ color: '#F59E0B' }}>2.6 bar</strong> (esperado: 3.2–4.1). Verificar filtro y bomba de aceite.
-            </p>
-          </div>
-
-          {/* AI Checklist */}
-          <div style={{ background: '#0F1A0F', border: '1px solid #1F2E1F', borderRadius: '12px', padding: '14px', marginBottom: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <span style={{ fontSize: '14px' }}>✨</span>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: '#E8F5E8', margin: 0 }}>
-                Lista de inspección — generada por IA
-              </p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {CHECKLIST.map((item, i) => (
-                <label key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer' }}>
-                  <div
-                    onClick={() => toggle(i)}
-                    style={{
-                      width: '18px', height: '18px', borderRadius: '4px', flexShrink: 0,
-                      border: checked[i] ? '2px solid #30BF12' : '2px solid #1F2E1F',
-                      background: checked[i] ? '#30BF12' : 'transparent',
+        {/* Status tracker */}
+        <div style={{
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderRadius: '10px', padding: '20px',
+        }}>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '0 0 18px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Estado de la orden</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+            {STATUS_STEPS.map((step, i) => {
+              const isLast = i === STATUS_STEPS.length - 1
+              return (
+                <div key={step.label} style={{ display: 'flex', gap: '12px' }}>
+                  {/* Line + dot */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                    <div style={{
+                      width: '20px', height: '20px', borderRadius: '50%', flexShrink: 0,
+                      background: step.done ? (step.active ? 'var(--green-500)' : 'var(--bg-elevated)') : 'var(--bg-elevated)',
+                      border: step.done ? (step.active ? '2px solid var(--green-500)' : '2px solid var(--green-500)') : '2px solid var(--border)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      marginTop: '1px', transition: 'all 150ms', cursor: 'pointer',
-                    }}
-                  >
-                    {checked[i] && (
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                        <path d="M2 5l2 2 4-4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                    }}>
+                      {step.done && !step.active && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--green-500)' }} />}
+                      {step.active && (
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#fff' }} />
+                      )}
+                    </div>
+                    {!isLast && (
+                      <div style={{ width: '2px', flex: 1, minHeight: '20px', background: step.done ? 'var(--green-500)' : 'var(--border)', margin: '3px 0' }} />
                     )}
                   </div>
-                  <span
-                    onClick={() => toggle(i)}
-                    style={{
-                      fontSize: '13px', lineHeight: 1.5,
-                      color: checked[i] ? '#4A6A4A' : '#E8F5E8',
-                      textDecoration: checked[i] ? 'line-through' : 'none',
-                      transition: 'color 150ms',
-                    }}
-                  >
-                    {item}
-                  </span>
-                </label>
-              ))}
-            </div>
-            <div style={{ marginTop: '12px', height: '3px', background: '#1F2E1F', borderRadius: '2px', overflow: 'hidden' }}>
-              <div style={{
-                height: '100%', borderRadius: '2px',
-                width: `${(checked.filter(Boolean).length / CHECKLIST.length) * 100}%`,
-                background: '#30BF12', transition: 'width 300ms ease',
-              }} />
-            </div>
-            <p style={{ fontSize: '11px', color: '#4A6A4A', margin: '6px 0 0', textAlign: 'right' }}>
-              {checked.filter(Boolean).length}/{CHECKLIST.length} completados
-            </p>
-          </div>
-
-          {/* History (collapsible) */}
-          <div style={{ background: '#0F1A0F', border: '1px solid #1F2E1F', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px' }}>
-            <button
-              onClick={() => setHistoryOpen(!historyOpen)}
-              style={{
-                width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '12px 14px', background: 'none', border: 'none', cursor: 'pointer',
-                color: '#7A9A7A', fontSize: '13px', fontFamily: 'inherit',
-              }}
-            >
-              Últimas intervenciones
-              {historyOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </button>
-            {historyOpen && (
-              <div style={{ borderTop: '1px solid #1F2E1F', padding: '12px 14px' }}>
-                {[
-                  ['18 may 2026', 'Revisión rutinaria — Sin hallazgos'],
-                  ['02 mar 2026', 'Cambio filtro de aceite — Completado'],
-                  ['15 nov 2025', 'Inspección anual — Completado'],
-                ].map(([date, action]) => (
-                  <div key={date} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#30BF12', flexShrink: 0, marginTop: '5px' }} />
-                    <div>
-                      <p style={{ fontSize: '12px', color: '#E8F5E8', margin: '0 0 1px' }}>{action}</p>
-                      <p style={{ fontSize: '11px', color: '#4A6A4A', margin: 0 }}>{date}</p>
-                    </div>
+                  {/* Label */}
+                  <div style={{ paddingBottom: isLast ? 0 : '16px' }}>
+                    <p style={{
+                      fontSize: '13px', fontWeight: step.active ? 600 : 400, margin: '1px 0 0',
+                      color: step.done ? 'var(--text-primary)' : 'var(--text-muted)',
+                    }}>
+                      {step.label}
+                      {step.active && (
+                        <span style={{ marginLeft: '8px', fontSize: '11px', color: 'var(--green-500)', fontWeight: 400 }}>· en curso</span>
+                      )}
+                    </p>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              )
+            })}
           </div>
         </div>
+      </div>
 
-        {/* Sticky close button */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          padding: '12px 16px 20px',
-          background: 'linear-gradient(transparent, #0A0F0A 30%)',
-        }}>
-          <button
-            onClick={() => navigate('cierre-orden001')}
-            style={{
-              width: '100%', padding: '13px', borderRadius: '10px',
-              fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-              transition: 'all 200ms',
-              ...(allChecked
-                ? { background: '#30BF12', border: '1px solid #30BF12', color: '#fff' }
-                : { background: 'transparent', border: '1px solid #1F2E1F', color: '#7A9A7A' }),
-            }}
-          >
-            Registrar intervención →
-          </button>
+      {/* AI checklist — read-only, for client info */}
+      <div style={{
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+        borderRadius: '10px', padding: '20px', marginBottom: '16px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <div style={{
+            width: '28px', height: '28px', borderRadius: '6px',
+            background: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <Sparkles size={13} style={{ color: '#8B5CF6' }} />
+          </div>
+          <div>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Lista de inspección asignada al técnico</p>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>Generada por IA · Luis Ponce la completará durante la visita</p>
+          </div>
         </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {CHECKLIST.map((item, i) => (
+            <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', padding: '8px 10px', borderRadius: '6px', background: 'var(--bg-elevated)' }}>
+              <div style={{
+                width: '16px', height: '16px', borderRadius: '4px', flexShrink: 0,
+                border: '1.5px solid var(--border)', background: 'transparent',
+              }} />
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Demo CTA */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+        borderRadius: '10px', padding: '16px 20px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Clock size={14} style={{ color: 'var(--text-muted)' }} />
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>
+            <span style={{ fontSize: '10px', fontWeight: 600, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: '4px', padding: '2px 6px', marginRight: '8px', color: 'var(--text-muted)', letterSpacing: '0.3px' }}>DEMO</span>
+            Simular que el técnico completó la visita y registró el cierre
+          </p>
+        </div>
+        <button
+          onClick={() => navigate('cierre-orden001')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            background: 'var(--green-500)', border: 'none', borderRadius: '7px',
+            padding: '8px 16px', color: '#fff', fontSize: '13px', fontWeight: 500,
+            cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+          }}
+        >
+          Ver cierre de orden <ChevronRight size={13} />
+        </button>
       </div>
     </div>
   )

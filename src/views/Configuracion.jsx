@@ -179,15 +179,6 @@ export default function Configuracion({ showToast }) {
         <ToggleRow label="Cambios de health score" description="Notificación al superar umbrales" defaultOn={false} />
       </SectionCard>
 
-      {/* Thresholds */}
-      <SectionCard title="Umbrales de alerta" description="Parámetros para la generación de eventos" icon={Sliders}>
-        <ThresholdRow label="Temperatura de refrigerante — alerta"  value="95"  unit="°C"  showToast={showToast} />
-        <ThresholdRow label="Temperatura de refrigerante — crítico" value="105" unit="°C"  showToast={showToast} />
-        <ThresholdRow label="Presión de aceite — mínimo"            value="2.5" unit="bar" showToast={showToast} />
-        <ThresholdRow label="Health score — alerta"                 value="70"  unit="/100" showToast={showToast} />
-        <ThresholdRow label="Health score — crítico"                value="50"  unit="/100" showToast={showToast} />
-      </SectionCard>
-
       {/* Users */}
       <SectionCard title="Usuarios y acceso" description="Personas con acceso a la plataforma" icon={Users}>
         <UserRow name="Rob Fuentes" email="rfuentes@transandina.cl" role="Supervisor" initials="RF" last />

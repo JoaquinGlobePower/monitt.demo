@@ -1,14 +1,31 @@
-import { LayoutDashboard, Cpu, Bell, Settings, Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Cpu, Bell, Settings, Sun, Moon, ChevronLeft, ChevronRight, Inbox, Users, Building2, ShieldCheck, LogOut } from 'lucide-react'
 
-const NAV_ITEMS = [
+const NAV_CLIENTE = [
   { id: 'dashboard', label: 'Dashboard',     icon: LayoutDashboard },
   { id: 'activos',   label: 'Activos',       icon: Cpu },
   { id: 'alertas',   label: 'Alertas',       icon: Bell },
   { id: 'config',    label: 'Configuración', icon: Settings },
 ]
 
-export default function Sidebar({ currentView, navigate, theme, setTheme, collapsed, setCollapsed, orderCompleted }) {
-  const alertCount = orderCompleted ? 0 : 1
+const NAV_ADMIN = [
+  { id: 'admin-dashboard', label: 'Resumen',     icon: LayoutDashboard },
+  { id: 'solicitudes',     label: 'Solicitudes', icon: Inbox },
+  { id: 'tecnicos-admin',  label: 'Técnicos',    icon: Users },
+  { id: 'empresas',        label: 'Empresas',    icon: Building2 },
+]
+
+export default function Sidebar({ role, currentView, navigate, theme, setTheme, collapsed, setCollapsed, orderCompleted, onLogout }) {
+  const isAdmin = role === 'admin'
+  const navItems = isAdmin ? NAV_ADMIN : NAV_CLIENTE
+
+  // Badge: client → active alerts. (Admin requests auto-assign, so no pending backlog.)
+  const clientAlertCount = orderCompleted ? 0 : 1
+  const badgeFor = (id) => {
+    if (!isAdmin && id === 'alertas') return clientAlertCount
+    return 0
+  }
+
+  const accent = isAdmin ? '#8B5CF6' : '#30BF12'
 
   const s = {
     aside: {
@@ -43,7 +60,7 @@ export default function Sidebar({ currentView, navigate, theme, setTheme, collap
       cursor: 'pointer',
       marginBottom: '2px',
       background: isActive ? 'var(--bg-elevated)' : 'transparent',
-      color: isActive ? 'var(--green-500)' : 'var(--text-secondary)',
+      color: isActive ? accent : 'var(--text-secondary)',
       fontSize: '14px',
       fontWeight: isActive ? 500 : 400,
       transition: 'all 150ms',
@@ -52,8 +69,8 @@ export default function Sidebar({ currentView, navigate, theme, setTheme, collap
     }),
     badge: {
       marginLeft: 'auto',
-      background: '#F59E0B',
-      color: '#000',
+      background: isAdmin ? '#EF4444' : '#F59E0B',
+      color: isAdmin ? '#fff' : '#000',
       fontSize: '11px',
       fontWeight: 700,
       width: '18px',
@@ -65,7 +82,7 @@ export default function Sidebar({ currentView, navigate, theme, setTheme, collap
       flexShrink: 0,
     },
     bottom: { padding: '12px 8px', borderTop: '1px solid var(--border)' },
-    themeBtn: {
+    actionBtn: {
       width: '100%',
       display: 'flex',
       alignItems: 'center',
@@ -85,13 +102,13 @@ export default function Sidebar({ currentView, navigate, theme, setTheme, collap
       width: '28px',
       height: '28px',
       borderRadius: '50%',
-      background: 'var(--green-700)',
+      background: isAdmin ? 'rgba(139,92,246,0.15)' : 'var(--green-700)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       fontSize: '11px',
       fontWeight: 700,
-      color: 'var(--green-400)',
+      color: isAdmin ? '#8B5CF6' : 'var(--green-400)',
       flexShrink: 0,
     },
     collapseBtn: {
@@ -114,11 +131,14 @@ export default function Sidebar({ currentView, navigate, theme, setTheme, collap
   }
 
   const isActive = (id) => {
-    if (id === 'dashboard') return currentView === 'dashboard'
-    if (id === 'activos')   return currentView === 'activos' || currentView === 'activo-gen001' || currentView === 'activo-gen002' || currentView === 'activo-gen003'
-    if (id === 'alertas')   return currentView === 'alertas'   || currentView === 'alerta-gen002'
-    if (id === 'tecnicos')  return currentView === 'tecnicos'  || currentView === 'tecnico-orden001' || currentView === 'cierre-orden001'
-    if (id === 'config')    return currentView === 'config'
+    if (id === 'dashboard')      return currentView === 'dashboard'
+    if (id === 'activos')        return ['activos', 'activo-gen001', 'activo-gen002', 'activo-gen003'].includes(currentView)
+    if (id === 'alertas')        return currentView === 'alertas' || currentView === 'alerta-gen002'
+    if (id === 'config')         return currentView === 'config'
+    if (id === 'admin-dashboard')return currentView === 'admin-dashboard'
+    if (id === 'solicitudes')    return currentView === 'solicitudes'
+    if (id === 'tecnicos-admin') return currentView === 'tecnicos-admin'
+    if (id === 'empresas')       return currentView === 'empresas'
     return false
   }
 
@@ -134,34 +154,49 @@ export default function Sidebar({ currentView, navigate, theme, setTheme, collap
         )}
       </div>
 
-      {/* Client name */}
+      {/* Context: client name or admin panel */}
       {!collapsed && (
         <div style={s.client}>
-          <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '0 0 2px' }}>Cliente</p>
-          <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)', margin: 0 }}>
-            TransAndina Logística
-          </p>
+          {isAdmin ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '26px', height: '26px', borderRadius: '6px', flexShrink: 0,
+                background: 'rgba(139,92,246,0.15)', color: '#8B5CF6',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <ShieldCheck size={14} />
+              </div>
+              <div>
+                <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>Panel interno</p>
+                <p style={{ fontSize: '13px', fontWeight: 600, color: '#8B5CF6', margin: 0 }}>Super admin</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '0 0 2px' }}>Cliente</p>
+              <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)', margin: 0 }}>
+                TransAndina Logística
+              </p>
+            </>
+          )}
         </div>
       )}
 
       {/* Navigation */}
       <nav style={s.nav}>
-        {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+        {navItems.map(({ id, label, icon: Icon }) => {
           const active = isActive(id)
-          const showBadge = id === 'alertas' && alertCount > 0
+          const count = badgeFor(id)
+          const showBadge = count > 0
 
           return (
-            <button
-              key={id}
-              onClick={() => navigate(id)}
-              style={s.navBtn(active)}
-            >
+            <button key={id} onClick={() => navigate(id)} style={s.navBtn(active)}>
               <Icon size={16} style={{ flexShrink: 0 }} />
               {!collapsed && <span style={{ flex: 1, textAlign: 'left' }}>{label}</span>}
-              {!collapsed && showBadge && <span style={s.badge}>{alertCount}</span>}
+              {!collapsed && showBadge && <span style={s.badge}>{count}</span>}
               {collapsed && showBadge && (
                 <span style={{ ...s.badge, position: 'absolute', top: 4, right: 4, width: '14px', height: '14px', fontSize: '9px' }}>
-                  {alertCount}
+                  {count}
                 </span>
               )}
             </button>
@@ -171,17 +206,31 @@ export default function Sidebar({ currentView, navigate, theme, setTheme, collap
 
       {/* Bottom */}
       <div style={s.bottom}>
-        <button style={s.themeBtn} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+        <button style={s.actionBtn} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           {!collapsed && <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>}
         </button>
 
+        <button
+          style={s.actionBtn}
+          onClick={onLogout}
+          onMouseEnter={e => e.currentTarget.style.color = '#EF4444'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+        >
+          <LogOut size={16} />
+          {!collapsed && <span>Cerrar sesión</span>}
+        </button>
+
         {!collapsed && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', marginTop: '4px' }}>
-            <div style={s.avatar}>RF</div>
+            <div style={s.avatar}>{isAdmin ? 'MO' : 'RF'}</div>
             <div>
-              <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>Rob Fuentes</p>
-              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>v0.1 demo</p>
+              <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>
+                {isAdmin ? 'Monitt.io' : 'Rob Fuentes'}
+              </p>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>
+                {isAdmin ? 'Super admin' : 'Supervisor'}
+              </p>
             </div>
           </div>
         )}

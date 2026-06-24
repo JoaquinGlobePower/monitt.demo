@@ -1,13 +1,29 @@
-import { AlertTriangle, CheckCircle, Clock, Filter, Bell, ChevronRight } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Clock, Filter, Bell, ChevronRight, Sparkles, Activity, ClipboardCheck } from 'lucide-react'
 import { useState } from 'react'
 
 const ALERTS = [
   {
+    id: 'ALT-025',
+    type: 'operational',
+    severity: 'critical',
+    asset: 'GEN-003',
+    title: 'Nivel de aceite bajo — requiere intervención',
+    description: 'Sensor de nivel de aceite registra 18% — umbral crítico es 25%. El generador no puede operar de forma segura. Se requiere técnico para reposición inmediata.',
+    location: 'Bodega Sur — San Bernardo',
+    time: 'Hace 2 horas',
+    date: '25 may 2026',
+    status: 'active',
+    assignee: null,
+    orderId: null,
+    demoTarget: null,
+  },
+  {
     id: 'ALT-024',
+    type: 'operational',
     severity: 'warning',
     asset: 'GEN-002',
     title: 'Anomalía en sistema de lubricación',
-    description: 'Sensor de presión de aceite registra valores fuera del rango nominal. Patrón consistente con desgaste prematuro en flotas similares.',
+    description: 'Sensor de presión de aceite registra valores fuera del rango nominal desde hace 5 días. El modelo predictivo estima 73% de probabilidad de falla en los próximos 7 días.',
     location: 'Bodega Sur — San Bernardo',
     time: 'Hace 5 días',
     date: '20 may 2026',
@@ -18,19 +34,22 @@ const ALERTS = [
   },
   {
     id: 'ALT-023',
+    type: 'predictive',
     severity: 'info',
     asset: 'GEN-001',
-    title: 'Mantención preventiva próxima',
-    description: 'El activo GEN-001 alcanzará su intervalo de servicio programado en 28 días. Se recomienda coordinar con técnico.',
+    title: 'Mantención preventiva recomendada por IA',
+    description: 'El modelo predictivo estima un 81% de probabilidad de falla menor en los próximos 45 días si no se realiza mantención. El activo se encuentra dentro del rango operativo.',
     location: 'Bodega Norte — Quilicura',
     time: 'Hace 3 días',
     date: '22 may 2026',
     status: 'active',
     assignee: null,
     orderId: null,
+    demoTarget: null,
   },
   {
     id: 'ALT-022',
+    type: 'operational',
     severity: 'warning',
     asset: 'GEN-003',
     title: 'Temperatura de refrigerante elevada',
@@ -41,19 +60,22 @@ const ALERTS = [
     status: 'resolved',
     assignee: 'Luis Torres',
     orderId: 'ORD-000',
+    demoTarget: null,
   },
   {
     id: 'ALT-021',
+    type: 'post-revision',
     severity: 'critical',
     asset: 'GEN-001',
-    title: 'Falla en módulo de arranque',
-    description: 'El módulo de arranque no respondió al primer ciclo de encendido. Arranque exitoso al segundo intento.',
+    title: 'Desgaste crítico detectado post-revisión',
+    description: 'Técnico Carlos Méndez detectó desgaste severo en cojinetes del alternador durante visita de mantención ORD-999. El activo requería intervención mayor no anticipada.',
     location: 'Bodega Norte — Quilicura',
     time: 'Hace 18 días',
     date: '07 may 2026',
     status: 'resolved',
     assignee: 'Carlos Méndez',
     orderId: 'ORD-999',
+    demoTarget: null,
   },
 ]
 
@@ -63,23 +85,76 @@ const SEVERITY_CONFIG = {
   info:     { color: '#3B82F6', bg: 'rgba(59,130,246,0.08)', label: 'Info', icon: Bell },
 }
 
+const TYPE_CONFIG = {
+  predictive:      { label: 'IA Predictiva',  icon: Sparkles,       color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)' },
+  operational:     { label: 'Operacional',    icon: Activity,       color: '#0EA5E9', bg: 'rgba(14,165,233,0.1)' },
+  'post-revision': { label: 'Post-revisión',  icon: ClipboardCheck, color: '#F97316', bg: 'rgba(249,115,22,0.1)' },
+}
+
+function TypeLegend() {
+  const items = [
+    {
+      ...TYPE_CONFIG.predictive,
+      key: 'predictive',
+      desc: 'El modelo de IA detecta un patrón de riesgo antes de que ocurra la falla. La acción es preventiva.',
+    },
+    {
+      ...TYPE_CONFIG.operational,
+      key: 'operational',
+      desc: 'Un sensor superó un umbral crítico en tiempo real. Requiere acción inmediata del técnico.',
+    },
+    {
+      ...TYPE_CONFIG['post-revision'],
+      key: 'post-revision',
+      desc: 'El técnico encontró una condición grave durante la visita. Nace después de la revisión presencial.',
+    },
+  ]
+
+  return (
+    <div style={{
+      display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px',
+    }}>
+      {items.map(({ key, label, icon: Icon, color, bg, desc }) => (
+        <div key={key} style={{
+          background: 'var(--bg-surface)', border: `1px solid var(--border)`,
+          borderLeft: `3px solid ${color}`,
+          borderRadius: '10px', padding: '14px 16px',
+          display: 'flex', flexDirection: 'column', gap: '8px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{
+              width: '26px', height: '26px', borderRadius: '6px', background: bg,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}>
+              <Icon size={13} style={{ color }} />
+            </div>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{label}</span>
+          </div>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>{desc}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function AlertRow({ alert, showToast, navigate, last }) {
   const cfg = SEVERITY_CONFIG[alert.severity]
+  const tcfg = TYPE_CONFIG[alert.type]
   const Icon = cfg.icon
+  const TypeIcon = tcfg.icon
   const isActive = alert.status === 'active'
 
-  // Resolved rows use neutral/muted styling throughout
-  const iconColor   = isActive ? cfg.color : 'var(--text-muted)'
-  const iconBg      = isActive ? cfg.bg    : 'var(--bg-elevated)'
-  const badgeColor  = isActive ? cfg.color : 'var(--text-muted)'
-  const badgeBg     = isActive ? cfg.bg    : 'var(--bg-elevated)'
-  const rowBg       = isActive && alert.severity !== 'info' ? cfg.bg : 'transparent'
-  const titleColor  = isActive ? 'var(--text-primary)' : 'var(--text-secondary)'
+  const iconColor  = isActive ? cfg.color : 'var(--text-muted)'
+  const iconBg     = isActive ? cfg.bg    : 'var(--bg-elevated)'
+  const badgeColor = isActive ? cfg.color : 'var(--text-muted)'
+  const badgeBg    = isActive ? cfg.bg    : 'var(--bg-elevated)'
+  const rowBg      = isActive && alert.severity !== 'info' ? cfg.bg : 'transparent'
+  const titleColor = isActive ? 'var(--text-primary)' : 'var(--text-secondary)'
 
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '32px 1fr 120px 130px 130px 110px',
+      gridTemplateColumns: '32px 1fr 140px 120px 130px 110px',
       alignItems: 'center',
       gap: '16px',
       padding: '14px 20px',
@@ -97,10 +172,21 @@ function AlertRow({ alert, showToast, navigate, last }) {
 
       {/* Description */}
       <div>
-        <p style={{ fontSize: '13px', fontWeight: 500, color: titleColor, margin: '0 0 2px' }}>{alert.title}</p>
-        <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+        <p style={{ fontSize: '13px', fontWeight: 500, color: titleColor, margin: '0 0 3px' }}>{alert.title}</p>
+        <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 5px', lineHeight: 1.4 }}>
           {alert.asset} · {alert.location}
         </p>
+        {/* Type chip */}
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: '4px',
+          fontSize: '11px', fontWeight: 500,
+          color: isActive ? tcfg.color : 'var(--text-muted)',
+          background: isActive ? tcfg.bg : 'var(--bg-elevated)',
+          padding: '2px 7px', borderRadius: '4px',
+        }}>
+          <TypeIcon size={10} />
+          {tcfg.label}
+        </span>
       </div>
 
       {/* Severity badge */}
@@ -146,28 +232,31 @@ function AlertRow({ alert, showToast, navigate, last }) {
 
 export default function Alertas({ showToast, navigate }) {
   const [filter, setFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
 
   const filtered = ALERTS.filter(a => {
-    if (filter === 'active')   return a.status === 'active'
-    if (filter === 'resolved') return a.status === 'resolved'
-    return true
+    const statusOk = filter === 'all' || a.status === filter
+    const typeOk   = typeFilter === 'all' || a.type === typeFilter
+    return statusOk && typeOk
   })
 
-  const activeCount   = ALERTS.filter(a => a.status === 'active').length
-  const resolvedCount = ALERTS.filter(a => a.status === 'resolved').length
+  const activeCount      = ALERTS.filter(a => a.status === 'active').length
+  const resolvedCount    = ALERTS.filter(a => a.status === 'resolved').length
+  const predictiveCount  = ALERTS.filter(a => a.type === 'predictive').length
+  const postRevCount     = ALERTS.filter(a => a.type === 'post-revision').length
 
-  const tabStyle = (id) => ({
+  const tabStyle = (id, activeVal) => ({
     padding: '6px 14px', borderRadius: '6px', border: 'none',
     cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', fontWeight: 500,
-    background: filter === id ? 'var(--bg-elevated)' : 'transparent',
-    color: filter === id ? 'var(--text-primary)' : 'var(--text-muted)',
+    background: activeVal === id ? 'var(--bg-elevated)' : 'transparent',
+    color: activeVal === id ? 'var(--text-primary)' : 'var(--text-muted)',
     transition: 'all 150ms',
   })
 
   return (
     <div style={{ padding: '32px', maxWidth: '1100px', margin: '0 auto' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px' }}>Alertas</h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>
@@ -187,13 +276,16 @@ export default function Alertas({ showToast, navigate }) {
         </button>
       </div>
 
+      {/* Type legend */}
+      <TypeLegend />
+
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
         {[
-          { label: 'Activas',     value: activeCount,   color: activeCount > 0 ? '#F59E0B' : '#30BF12' },
-          { label: 'Resueltas',   value: resolvedCount, color: '#30BF12' },
-          { label: 'Total (30d)', value: ALERTS.length, color: 'var(--text-primary)' },
-          { label: 'Críticas',    value: ALERTS.filter(a => a.severity === 'critical').length, color: '#EF4444' },
+          { label: 'Activas',         value: activeCount,     color: activeCount > 0 ? '#F59E0B' : '#30BF12' },
+          { label: 'Resueltas',       value: resolvedCount,   color: '#30BF12' },
+          { label: 'IA Predictiva',   value: predictiveCount, color: '#8B5CF6' },
+          { label: 'Post-revisión',   value: postRevCount,    color: '#F97316' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
@@ -207,18 +299,29 @@ export default function Alertas({ showToast, navigate }) {
 
       {/* Table */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
-        {/* Table header */}
-        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Filters row */}
+        <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', gap: '4px' }}>
             {[['all', 'Todas'], ['active', 'Activas'], ['resolved', 'Resueltas']].map(([id, label]) => (
-              <button key={id} style={tabStyle(id)} onClick={() => setFilter(id)}>{label}</button>
+              <button key={id} style={tabStyle(id, filter)} onClick={() => setFilter(id)}>{label}</button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginRight: '4px' }}>Tipo:</span>
+            {[
+              ['all', 'Todos'],
+              ['predictive', 'IA Predictiva'],
+              ['operational', 'Operacional'],
+              ['post-revision', 'Post-revisión'],
+            ].map(([id, label]) => (
+              <button key={id} style={{ ...tabStyle(id, typeFilter), fontSize: '12px', padding: '4px 10px' }} onClick={() => setTypeFilter(id)}>{label}</button>
             ))}
           </div>
           <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{filtered.length} eventos</span>
         </div>
 
         {/* Column headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: '32px 1fr 120px 130px 130px 110px', gap: '16px', padding: '10px 20px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '32px 1fr 140px 120px 130px 110px', gap: '16px', padding: '10px 20px', borderBottom: '1px solid var(--border)' }}>
           {['', 'Evento', 'Severidad', 'Estado', 'Fecha', ''].map((h, i) => (
             <span key={i} style={{ fontSize: '11px', fontWeight: 500, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</span>
           ))}

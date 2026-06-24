@@ -1,8 +1,26 @@
 import { useState } from 'react'
-import { Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, ArrowRight, Building2, ShieldCheck } from 'lucide-react'
 
-const DEMO_USER = 'rfuentes@transandina.cl'
-const DEMO_PASS = 'Monitt2026'
+const ACCOUNTS = [
+  {
+    role: 'cliente',
+    user: 'rfuentes@transandina.cl',
+    pass: 'Monitt2026',
+    title: 'Cliente',
+    subtitle: 'Rob Fuentes · TransAndina Logística',
+    icon: Building2,
+    accent: '#30BF12',
+  },
+  {
+    role: 'admin',
+    user: 'admin@monitt.io',
+    pass: 'Admin2026',
+    title: 'Super admin',
+    subtitle: 'Panel interno · Monitt.io',
+    icon: ShieldCheck,
+    accent: '#8B5CF6',
+  },
+]
 
 export default function Login({ onLogin, theme }) {
   const [email, setEmail]       = useState('')
@@ -16,8 +34,9 @@ export default function Login({ onLogin, theme }) {
     setError(false)
     setLoading(true)
     setTimeout(() => {
-      if (email.trim() === DEMO_USER && password === DEMO_PASS) {
-        onLogin()
+      const match = ACCOUNTS.find(a => a.user === email.trim() && a.pass === password)
+      if (match) {
+        onLogin(match.role)
       } else {
         setError(true)
         setLoading(false)
@@ -25,9 +44,9 @@ export default function Login({ onLogin, theme }) {
     }, 700)
   }
 
-  const fillDemo = () => {
-    setEmail(DEMO_USER)
-    setPassword(DEMO_PASS)
+  const fillDemo = (account) => {
+    setEmail(account.user)
+    setPassword(account.pass)
     setError(false)
   }
 
@@ -101,7 +120,7 @@ export default function Login({ onLogin, theme }) {
           }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#30BF12' }} />
             <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-              TransAndina Logística
+              Plataforma de monitoreo predictivo
             </span>
           </div>
         </div>
@@ -217,39 +236,53 @@ export default function Login({ onLogin, theme }) {
           </form>
         </div>
 
-        {/* Demo credentials hint */}
+        {/* Demo credentials hint — two profiles */}
         <div style={{ marginTop: '16px' }}>
-          <button
-            onClick={fillDemo}
-            style={{
-              width: '100%',
-              background: 'transparent',
-              border: '1px dashed var(--border)',
-              borderRadius: '10px',
-              padding: '14px 16px',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              textAlign: 'left',
-            }}
-          >
-            <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Credenciales de demo — click para autocompletar
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', width: '76px' }}>Usuario</span>
-                <code style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
-                  {DEMO_USER}
-                </code>
-              </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', width: '76px' }}>Contraseña</span>
-                <code style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
-                  {DEMO_PASS}
-                </code>
-              </div>
-            </div>
-          </button>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>
+            Credenciales de demo — click para autocompletar
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {ACCOUNTS.map(account => {
+              const Icon = account.icon
+              return (
+                <button
+                  key={account.role}
+                  onClick={() => fillDemo(account)}
+                  style={{
+                    width: '100%',
+                    background: 'transparent',
+                    border: '1px dashed var(--border)',
+                    borderRadius: '10px',
+                    padding: '12px 14px',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    transition: 'border-color 150ms',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = account.accent}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                >
+                  <div style={{
+                    width: '34px', height: '34px', borderRadius: '8px', flexShrink: 0,
+                    background: `${account.accent}1f`, color: account.accent,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Icon size={16} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 1px' }}>{account.title}</p>
+                    <code style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                      {account.user} · {account.pass}
+                    </code>
+                  </div>
+                  <ArrowRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         <p style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '20px' }}>
