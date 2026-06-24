@@ -81,6 +81,15 @@ export const EMPRESAS = [
   },
 ]
 
+// Third-party service providers. Technicians are OUTSOURCED: they belong to
+// these external firms, never to the client companies. Monitt coordinates
+// and dispatches them across all clients.
+export const PROVEEDORES = [
+  { id: 'PRV-001', name: 'GenService Ltda.',     short: 'GenService',  accent: '#0EA5E9' },
+  { id: 'PRV-002', name: 'TecnoDiésel SpA',      short: 'TecnoDiésel', accent: '#EAB308' },
+  { id: 'PRV-003', name: 'Andes Power Servicios', short: 'Andes Power', accent: '#A855F7' },
+]
+
 export const TECNICOS = [
   {
     id: 'TEC-001',
@@ -91,7 +100,7 @@ export const TECNICOS = [
     phone: '+56 9 8234 5670',
     zone: 'Región Metropolitana',
     status: 'on-site',
-    company: 'EMP-001',
+    provider: 'PRV-001',
     rating: 4.9,
     activeOrders: 1,
     completedMonth: 9,
@@ -106,7 +115,7 @@ export const TECNICOS = [
     phone: '+56 9 7612 3490',
     zone: 'Región Metropolitana',
     status: 'available',
-    company: 'EMP-001',
+    provider: 'PRV-002',
     rating: 4.8,
     activeOrders: 0,
     completedMonth: 7,
@@ -121,7 +130,7 @@ export const TECNICOS = [
     phone: '+56 9 6789 0123',
     zone: 'Las Condes, Santiago',
     status: 'available',
-    company: 'EMP-007',
+    provider: 'PRV-001',
     rating: 5.0,
     activeOrders: 1,
     completedMonth: 12,
@@ -136,7 +145,7 @@ export const TECNICOS = [
     phone: '+56 9 5566 7788',
     zone: 'Vitacura, Santiago',
     status: 'on-site',
-    company: 'EMP-006',
+    provider: 'PRV-003',
     rating: 4.9,
     activeOrders: 1,
     completedMonth: 10,
@@ -149,9 +158,9 @@ export const TECNICOS = [
     role: 'Técnico de Terreno',
     specialty: 'Mantenimiento preventivo & diagnóstico',
     phone: '+56 9 9045 8812',
-    zone: 'Nacional (pool)',
+    zone: 'Región Metropolitana',
     status: 'available',
-    company: null,
+    provider: 'PRV-002',
     rating: 4.6,
     activeOrders: 0,
     completedMonth: 6,
@@ -164,9 +173,9 @@ export const TECNICOS = [
     role: 'Técnico Especialista',
     specialty: 'Sistemas de control & telemetría',
     phone: '+56 9 3344 5566',
-    zone: 'Nacional (pool)',
+    zone: 'Cobertura nacional',
     status: 'available',
-    company: null,
+    provider: 'PRV-003',
     rating: 4.8,
     activeOrders: 0,
     completedMonth: 8,
@@ -179,9 +188,9 @@ export const TECNICOS = [
     role: 'Técnico de Terreno',
     specialty: 'Combustible, filtros & refrigeración',
     phone: '+56 9 2211 0099',
-    zone: 'Nacional (pool)',
+    zone: 'Cobertura nacional',
     status: 'off-duty',
-    company: null,
+    provider: 'PRV-001',
     rating: 4.4,
     activeOrders: 0,
     completedMonth: 5,
@@ -302,10 +311,10 @@ export const TEC_STATUS = {
 
 export const empresaById = (id) => EMPRESAS.find(e => e.id === id) || null
 export const tecnicoById = (id) => TECNICOS.find(t => t.id === id) || null
+export const proveedorById = (id) => PROVEEDORES.find(p => p.id === id) || null
 
-// Technicians eligible for a given company: its dedicated team + the general pool.
-// Monitt auto-assigns from this set (dedicated team prioritized, then specialty
-// fit and availability). Each request stores its original pick in `autoTec`,
-// so "volver a automático" restores exactly that.
-export const eligibleTecnicos = (companyId) =>
-  TECNICOS.filter(t => t.company === companyId || t.company === null)
+// Technicians are outsourced from third-party providers, so any active
+// technician can be dispatched to any client. Monitt auto-assigns the best
+// fit (by specialty, availability and load); each request stores its original
+// pick in `autoTec`, so "volver a automático" restores exactly that.
+export const assignableTecnicos = () => TECNICOS

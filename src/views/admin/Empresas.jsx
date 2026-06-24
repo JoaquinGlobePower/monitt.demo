@@ -1,7 +1,7 @@
-import { Cpu, AlertTriangle, MapPin, Users, ChevronRight, UserRound } from 'lucide-react'
-import { EMPRESAS, TECNICOS } from '../../data/adminData'
+import { Cpu, AlertTriangle, MapPin, Inbox, ChevronRight, UserRound } from 'lucide-react'
+import { EMPRESAS, SOLICITUDES } from '../../data/adminData'
 
-function EmpresaCard({ emp, dedicatedCount, showToast }) {
+function EmpresaCard({ emp, solicitudesCount, showToast }) {
   return (
     <div style={{
       background: 'var(--bg-surface)', border: '1px solid var(--border)',
@@ -64,10 +64,10 @@ function EmpresaCard({ emp, dedicatedCount, showToast }) {
         </div>
         <div style={{ padding: '12px', background: 'var(--bg-elevated)', borderRadius: '7px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '4px' }}>
-            <Users size={12} style={{ color: 'var(--text-muted)' }} />
-            <span style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Técnicos</span>
+            <Inbox size={12} style={{ color: 'var(--text-muted)' }} />
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Solicitudes</span>
           </div>
-          <p style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: 0, lineHeight: 1 }}>{dedicatedCount}</p>
+          <p style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: 0, lineHeight: 1 }}>{solicitudesCount}</p>
         </div>
       </div>
 
@@ -89,7 +89,7 @@ function EmpresaCard({ emp, dedicatedCount, showToast }) {
 export default function Empresas({ showToast }) {
   const totalAssets = EMPRESAS.reduce((s, e) => s + e.assets, 0)
   const totalAlerts = EMPRESAS.reduce((s, e) => s + e.activeAlerts, 0)
-  const dedicatedCount = (empId) => TECNICOS.filter(t => t.company === empId).length
+  const solicitudesCount = (empId) => SOLICITUDES.filter(s => s.company === empId).length
 
   return (
     <div style={{ padding: '32px', maxWidth: '1180px', margin: '0 auto' }}>
@@ -122,7 +122,7 @@ export default function Empresas({ showToast }) {
       {/* Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '16px' }}>
         {EMPRESAS.map(emp => (
-          <EmpresaCard key={emp.id} emp={emp} dedicatedCount={dedicatedCount(emp.id)} showToast={showToast} />
+          <EmpresaCard key={emp.id} emp={emp} solicitudesCount={solicitudesCount(emp.id)} showToast={showToast} />
         ))}
       </div>
     </div>

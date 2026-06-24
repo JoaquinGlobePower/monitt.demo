@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Inbox, ChevronDown, ChevronUp, Check, RefreshCw, Star, Sparkles, UserCog, Wand2, AlertTriangle } from 'lucide-react'
 import {
-  EMPRESAS, PRIORITY_CONFIG, ALERT_TYPE_CONFIG, TEC_STATUS,
-  empresaById, tecnicoById, eligibleTecnicos,
+  EMPRESAS, TECNICOS, PROVEEDORES, PRIORITY_CONFIG, ALERT_TYPE_CONFIG, TEC_STATUS,
+  empresaById, tecnicoById,
 } from '../../data/adminData'
 
 function CompanyChip({ companyId }) {
@@ -127,15 +127,11 @@ function TecOption({ tec, isCurrent, onSelect }) {
 }
 
 function ReassignPanel({ sol, onAssign, onReAuto }) {
-  const eligible = eligibleTecnicos(sol.company)
-  const dedicated = eligible.filter(t => t.company === sol.company)
-  const pool = eligible.filter(t => t.company === null)
-
   return (
     <div style={{ borderTop: '1px solid var(--border)', padding: '16px 20px', background: 'var(--bg-page)' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '14px' }}>
         <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, flex: 1 }}>
-          Monitt asignó este técnico automáticamente. Puedes reasignar manualmente — se muestran el <strong>equipo dedicado</strong> de {empresaById(sol.company)?.short} y el <strong>pool general</strong> de Monitt.
+          Monitt asignó este técnico automáticamente. El servicio es <strong>tercerizado</strong>: puedes reasignar a cualquier técnico de los proveedores externos.
         </p>
         {sol.assignment === 'manual' && (
           <button
@@ -152,27 +148,23 @@ function ReassignPanel({ sol, onAssign, onReAuto }) {
         )}
       </div>
 
-      {dedicated.length > 0 && (
-        <>
-          <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px', margin: '0 0 8px' }}>
-            Equipo dedicado — {empresaById(sol.company)?.short}
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-            {dedicated.map(t => (
-              <TecOption key={t.id} tec={t} isCurrent={t.id === sol.assignedTo} onSelect={onAssign} />
-            ))}
+      {PROVEEDORES.map(prov => {
+        const techs = TECNICOS.filter(t => t.provider === prov.id)
+        if (techs.length === 0) return null
+        return (
+          <div key={prov.id} style={{ marginBottom: '14px' }}>
+            <p style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px', margin: '0 0 8px', color: prov.accent, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '7px', height: '7px', borderRadius: '2px', background: prov.accent }} />
+              {prov.name}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {techs.map(t => (
+                <TecOption key={t.id} tec={t} isCurrent={t.id === sol.assignedTo} onSelect={onAssign} />
+              ))}
+            </div>
           </div>
-        </>
-      )}
-
-      <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px', margin: '0 0 8px' }}>
-        Pool general Monitt
-      </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {pool.map(t => (
-          <TecOption key={t.id} tec={t} isCurrent={t.id === sol.assignedTo} onSelect={onAssign} />
-        ))}
-      </div>
+        )
+      })}
     </div>
   )
 }

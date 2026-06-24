@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Wrench, MapPin, Phone, Star, Building2, Globe, ChevronRight } from 'lucide-react'
-import { TECNICOS, EMPRESAS, TEC_STATUS, empresaById } from '../../data/adminData'
+import { Wrench, MapPin, Phone, Star, Briefcase, ChevronRight } from 'lucide-react'
+import { TECNICOS, PROVEEDORES, TEC_STATUS, proveedorById } from '../../data/adminData'
 
 function TechCard({ tech, showToast }) {
   const st = TEC_STATUS[tech.status]
-  const emp = empresaById(tech.company)
-  const isPool = tech.company === null
+  const prov = proveedorById(tech.provider)
 
   return (
     <div style={{
@@ -34,19 +33,16 @@ function TechCard({ tech, showToast }) {
         </div>
       </div>
 
-      {/* Assignment badge — dedicated company or general pool */}
+      {/* Provider badge — outsourced third-party firm the technician belongs to */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: '7px',
-        background: isPool ? 'var(--bg-elevated)' : `${emp.accent}14`,
-        border: `1px solid ${isPool ? 'var(--border)' : `${emp.accent}40`}`,
+        background: `${prov.accent}14`,
+        border: `1px solid ${prov.accent}40`,
         borderRadius: '7px', padding: '7px 10px',
       }}>
-        {isPool
-          ? <Globe size={13} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-          : <Building2 size={13} style={{ color: emp.accent, flexShrink: 0 }} />
-        }
-        <span style={{ fontSize: '12px', fontWeight: 500, color: isPool ? 'var(--text-secondary)' : emp.accent }}>
-          {isPool ? 'Pool general Monitt' : `Dedicado · ${emp.short}`}
+        <Briefcase size={13} style={{ color: prov.accent, flexShrink: 0 }} />
+        <span style={{ fontSize: '12px', fontWeight: 500, color: prov.accent }}>
+          Proveedor · {prov.name}
         </span>
       </div>
 
@@ -114,27 +110,22 @@ function TechCard({ tech, showToast }) {
 }
 
 export default function TecnicosAdmin({ showToast }) {
-  const [companyFilter, setCompanyFilter] = useState('all')
+  const [providerFilter, setProviderFilter] = useState('all')
 
-  const filtered = TECNICOS.filter(t => {
-    if (companyFilter === 'all') return true
-    if (companyFilter === 'pool') return t.company === null
-    return t.company === companyFilter
-  })
+  const filtered = TECNICOS.filter(t => providerFilter === 'all' || t.provider === providerFilter)
 
   const available = TECNICOS.filter(t => t.status === 'available').length
   const onSite    = TECNICOS.filter(t => t.status === 'on-site').length
-  const poolCount = TECNICOS.filter(t => t.company === null).length
 
   const tab = (id, label) => (
     <button
       key={id}
-      onClick={() => setCompanyFilter(id)}
+      onClick={() => setProviderFilter(id)}
       style={{
         padding: '6px 14px', borderRadius: '6px', border: 'none', cursor: 'pointer',
         fontSize: '13px', fontFamily: 'inherit', fontWeight: 500,
-        background: companyFilter === id ? 'var(--bg-elevated)' : 'transparent',
-        color: companyFilter === id ? 'var(--text-primary)' : 'var(--text-muted)',
+        background: providerFilter === id ? 'var(--bg-elevated)' : 'transparent',
+        color: providerFilter === id ? 'var(--text-primary)' : 'var(--text-muted)',
         transition: 'all 150ms',
       }}
     >
@@ -148,7 +139,7 @@ export default function TecnicosAdmin({ showToast }) {
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '22px', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px' }}>Técnicos</h1>
         <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>
-          Equipo de servicio de Monitt — dedicados por empresa y pool general
+          Servicio técnico tercerizado — proveedores externos coordinados por Monitt
         </p>
       </div>
 
@@ -158,7 +149,7 @@ export default function TecnicosAdmin({ showToast }) {
           { label: 'Total técnicos', value: TECNICOS.length, color: 'var(--text-primary)' },
           { label: 'Disponibles',    value: available, color: '#30BF12' },
           { label: 'En terreno',     value: onSite, color: '#F59E0B' },
-          { label: 'Pool general',   value: poolCount, color: '#0EA5E9' },
+          { label: 'Proveedores',    value: PROVEEDORES.length, color: '#0EA5E9' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
@@ -170,11 +161,10 @@ export default function TecnicosAdmin({ showToast }) {
         ))}
       </div>
 
-      {/* Company filter */}
+      {/* Provider filter */}
       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '20px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '8px 12px' }}>
         {tab('all', 'Todos')}
-        {EMPRESAS.map(e => tab(e.id, e.short))}
-        {tab('pool', 'Pool general')}
+        {PROVEEDORES.map(p => tab(p.id, p.short))}
       </div>
 
       {/* Grid */}

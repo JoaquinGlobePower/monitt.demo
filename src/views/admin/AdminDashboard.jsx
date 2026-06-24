@@ -1,7 +1,7 @@
 import { Sparkles, Users, Building2, UserCog, ChevronRight, Clock } from 'lucide-react'
 import {
   EMPRESAS, TECNICOS, PRIORITY_CONFIG, TEC_STATUS,
-  empresaById, tecnicoById,
+  empresaById, tecnicoById, proveedorById,
 } from '../../data/adminData'
 
 function KpiCard({ label, value, sub, color, icon: Icon, onClick }) {
@@ -156,7 +156,7 @@ export default function AdminDashboard({ solicitudes, navigate }) {
           <div style={{ padding: '8px 12px' }}>
             {TECNICOS.map((tec, i) => {
               const st = TEC_STATUS[tec.status]
-              const emp = empresaById(tec.company)
+              const prov = proveedorById(tec.provider)
               return (
                 <div key={tec.id} style={{
                   display: 'flex', alignItems: 'center', gap: '10px',
@@ -171,7 +171,7 @@ export default function AdminDashboard({ solicitudes, navigate }) {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tec.name}</p>
-                    <p style={{ fontSize: '10px', color: 'var(--text-muted)', margin: 0 }}>{emp ? emp.short : 'Pool general'}</p>
+                    <p style={{ fontSize: '10px', color: 'var(--text-muted)', margin: 0 }}>{prov ? prov.short : '—'}</p>
                   </div>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: st.color, flexShrink: 0 }}>
                     <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: st.color }} />
