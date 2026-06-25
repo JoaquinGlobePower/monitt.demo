@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { SignedIn, SignedOut, useUser, useClerk } from '@clerk/clerk-react'
 import Sidebar from './components/Sidebar'
 import Toast from './components/Toast'
 import Dashboard from './views/Dashboard'
@@ -10,7 +11,8 @@ import Activos from './views/Activos'
 import ActivoDetalle from './views/ActivoDetalle'
 import Alertas from './views/Alertas'
 import Configuracion from './views/Configuracion'
-import Login from './views/Login'
+import SignInView from './views/SignInView'
+import PendingActivation from './views/PendingActivation'
 import AdminDashboard from './views/admin/AdminDashboard'
 import Solicitudes from './views/admin/Solicitudes'
 import TecnicosAdmin from './views/admin/TecnicosAdmin'
@@ -21,18 +23,36 @@ const DEFAULT_VIEW = { cliente: 'dashboard', admin: 'admin-dashboard' }
 
 function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('monitt-theme') || 'dark')
-  const [role, setRole] = useState(null) // null | 'cliente' | 'admin'
   const [currentView, setCurrentView] = useState('dashboard')
   const [orderCompleted, setOrderCompleted] = useState(false)
   const [toast, setToast] = useState(null)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [solicitudes, setSolicitudes] = useState(SOLICITUDES)
 
+  const { user } = useUser()
+  const clerk = useClerk()
+
+  // El rol viene de los metadatos públicos del usuario en Clerk; por defecto, "cliente".
+  // Para el panel admin, pon { "role": "admin" } en Public metadata del usuario (panel de Clerk).
+  const role = user?.publicMetadata?.role === 'admin' ? 'admin' : 'cliente'
+
+  // El cliente queda "amarrado" a su empresa: solo verá los equipos de su companyId.
+  const companyId = user?.publicMetadata?.companyId
+
+  // Solo entran a la plataforma los usuarios dados de alta por Monitt:
+  // admin interno, o cliente con empresa asignada (companyId en los metadatos de Clerk).
+  const isProvisioned = role === 'admin' || Boolean(companyId)
+
   useEffect(() => {
     const html = document.documentElement
     theme === 'light' ? html.classList.add('light') : html.classList.remove('light')
     localStorage.setItem('monitt-theme', theme)
   }, [theme])
+
+  // Al iniciar sesión, aterriza en la vista por defecto del rol.
+  useEffect(() => {
+    if (user?.id) setCurrentView(DEFAULT_VIEW[role])
+  }, [user?.id, role])
 
   const navigate = (view) => {
     setCurrentView(view)
@@ -45,17 +65,6 @@ function App() {
   }
 
   const completeOrder = () => setOrderCompleted(true)
-
-  const login = (loginRole) => {
-    setRole(loginRole)
-    setCurrentView(DEFAULT_VIEW[loginRole])
-  }
-
-  const logout = () => {
-    setRole(null)
-    setCurrentView('dashboard')
-    setSidebarCollapsed(false)
-  }
 
   // Manual reassignment by the admin (overrides the automatic assignment)
   const assignTecnico = (solId, tecId) => {
@@ -74,7 +83,7 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       // Client profile
-      case 'dashboard':       return <Dashboard navigate={navigate} orderCompleted={orderCompleted} showToast={showToast} />
+      case 'dashboard':       return <Dashboard navigate={navigate} orderCompleted={orderCompleted} showToast={showToast} companyId={companyId} />
       case 'activo-gen002':   return <AssetDetail navigate={navigate} />
       case 'alerta-gen002':   return <AlertDispatch navigate={navigate} />
       case 'tecnico-orden001':return <TechnicianView navigate={navigate} />
@@ -93,34 +102,46 @@ function App() {
 
       default:                return role === 'admin'
         ? <AdminDashboard solicitudes={solicitudes} navigate={navigate} />
-        : <Dashboard navigate={navigate} orderCompleted={orderCompleted} showToast={showToast} />
+        : <Dashboard navigate={navigate} orderCompleted={orderCompleted} showToast={showToast} companyId={companyId} />
     }
   }
 
-  if (!role) {
-    return <Login onLogin={login} theme={theme} />
-  }
-
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--bg-page)', color: 'var(--text-primary)' }}>
-      <Sidebar
-        role={role}
-        currentView={currentView}
-        navigate={navigate}
-        theme={theme}
-        setTheme={setTheme}
-        collapsed={sidebarCollapsed}
-        setCollapsed={setSidebarCollapsed}
-        orderCompleted={orderCompleted}
-        onLogout={logout}
-      />
-      <main key={currentView} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        <div className="page-fade">
-          {renderView()}
+    <>
+      {/* Sin sesión → ventana especial de inicio de sesión (Clerk) */}
+      <SignedOut>
+        <SignInView />
+      </SignedOut>
+
+      {/* Con sesión → la plataforma, pero solo si Monitt ya habilitó la cuenta */}
+      <SignedIn>
+        {!isProvisioned ? (
+          <PendingActivation user={user} onLogout={() => clerk.signOut()} />
+        ) : (
+        <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--bg-page)', color: 'var(--text-primary)' }}>
+          <Sidebar
+            role={role}
+            user={user}
+            currentView={currentView}
+            navigate={navigate}
+            theme={theme}
+            setTheme={setTheme}
+            collapsed={sidebarCollapsed}
+            setCollapsed={setSidebarCollapsed}
+            orderCompleted={orderCompleted}
+            onLogout={() => clerk.signOut()}
+            onManageAccount={() => clerk.openUserProfile()}
+          />
+          <main key={currentView} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+            <div className="page-fade">
+              {renderView()}
+            </div>
+          </main>
+          {toast && <Toast message={toast} />}
         </div>
-      </main>
-      {toast && <Toast message={toast} />}
-    </div>
+        )}
+      </SignedIn>
+    </>
   )
 }
 

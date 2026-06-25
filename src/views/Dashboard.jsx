@@ -3,6 +3,7 @@ import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell,
 } from 'recharts'
+import BuildingsMap from '../components/BuildingsMap'
 
 /* ── Sensor performance data (last 8 months) ── */
 const PERF_DATA = [
@@ -81,7 +82,7 @@ function KpiCard({ label, value, change, positive, sub, alert }) {
 }
 
 /* ── Main Dashboard ── */
-export default function Dashboard({ navigate, orderCompleted, showToast }) {
+export default function Dashboard({ navigate, orderCompleted, showToast, companyId }) {
   const gen002Score   = orderCompleted ? 89 : 58
   const gen002Color   = orderCompleted ? '#A8E63D' : '#F97316'
   const fleetScore    = orderCompleted ? 89 : 74
@@ -199,6 +200,11 @@ export default function Dashboard({ navigate, orderCompleted, showToast }) {
           </div>
         </div>
       )}
+
+      {/* ── Mapa de ubicaciones de edificios ── */}
+      <div style={{ marginBottom: '16px' }}>
+        <BuildingsMap companyId={companyId} orderCompleted={orderCompleted} navigate={navigate} />
+      </div>
 
       {/* ── Body: left+center | right panel ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '16px', flex: 1 }}>

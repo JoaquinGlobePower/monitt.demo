@@ -3,6 +3,7 @@ import {
   EMPRESAS, TECNICOS, PRIORITY_CONFIG, TEC_STATUS,
   empresaById, tecnicoById, proveedorById,
 } from '../../data/adminData'
+import BuildingsMap from '../../components/BuildingsMap'
 
 function KpiCard({ label, value, sub, color, icon: Icon, onClick }) {
   return (
@@ -72,6 +73,11 @@ export default function AdminDashboard({ solicitudes, navigate }) {
           sub={`${totalAlerts} alertas activas`} color="var(--text-primary)" icon={Building2}
           onClick={() => navigate('empresas')}
         />
+      </div>
+
+      {/* Mapa global: todos los equipos instalados, en todos los clientes */}
+      <div style={{ marginBottom: '24px' }}>
+        <BuildingsMap navigate={navigate} />
       </div>
 
       {/* Two columns: attention queue + technician availability */}

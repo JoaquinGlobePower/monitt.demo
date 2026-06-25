@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# App de landing embebida (tiene su propio repo git: monitt-landing)
+/landing/

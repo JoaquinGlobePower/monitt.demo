@@ -15,9 +15,18 @@ const NAV_ADMIN = [
   { id: 'empresas',        label: 'Empresas',    icon: Building2 },
 ]
 
-export default function Sidebar({ role, currentView, navigate, theme, setTheme, collapsed, setCollapsed, orderCompleted, onLogout }) {
+export default function Sidebar({ role, user, currentView, navigate, theme, setTheme, collapsed, setCollapsed, orderCompleted, onLogout, onManageAccount }) {
   const isAdmin = role === 'admin'
   const navItems = isAdmin ? NAV_ADMIN : NAV_CLIENTE
+
+  // Datos reales del usuario autenticado (Clerk)
+  const displayName = user?.fullName
+    || user?.username
+    || user?.primaryEmailAddress?.emailAddress
+    || (isAdmin ? 'Super admin' : 'Usuario')
+  const roleLabel = isAdmin ? 'Super admin' : 'Supervisor'
+  const initials = ((user?.firstName?.[0] || '') + (user?.lastName?.[0] || '')).toUpperCase()
+    || (displayName[0] || 'U').toUpperCase()
 
   // Badge: client → active alerts. (Admin requests auto-assign, so no pending backlog.)
   const clientAlertCount = orderCompleted ? 0 : 1
@@ -217,17 +226,28 @@ export default function Sidebar({ role, currentView, navigate, theme, setTheme, 
         </button>
 
         {!collapsed && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', marginTop: '4px' }}>
-            <div style={s.avatar}>{isAdmin ? 'MO' : 'RF'}</div>
-            <div>
-              <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>
-                {isAdmin ? 'Monitt.io' : 'Rob Fuentes'}
+          <button
+            onClick={onManageAccount}
+            title="Gestiona tu cuenta y contraseña"
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '8px 10px', marginTop: '4px', borderRadius: '6px',
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              fontFamily: 'inherit', textAlign: 'left', transition: 'background 150ms',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <div style={s.avatar}>{initials}</div>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {displayName}
               </p>
               <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>
-                {isAdmin ? 'Super admin' : 'Supervisor'}
+                {roleLabel}
               </p>
             </div>
-          </div>
+          </button>
         )}
       </div>
 
