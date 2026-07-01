@@ -9,7 +9,7 @@ export const EMPRESAS = [
     name: 'TransAndina Logística',
     short: 'TransAndina',
     initials: 'TA',
-    contact: 'Rob Fuentes',
+    contact: 'Cristián Bravo',
     rut: '76.123.456-7',
     plan: 'Enterprise',
     assets: 3,
@@ -218,7 +218,7 @@ export const SOLICITUDES = [
     assignedTo: 'TEC-001',
     autoTec: 'TEC-001',
     assignment: 'auto',
-    requestedBy: 'Rob Fuentes',
+    requestedBy: 'Cristián Bravo',
     createdAt: '25 may 2026, 09:41',
   },
   {
@@ -286,7 +286,7 @@ export const SOLICITUDES = [
     assignedTo: 'TEC-002',
     autoTec: 'TEC-002',
     assignment: 'auto',
-    requestedBy: 'Rob Fuentes',
+    requestedBy: 'Cristián Bravo',
     createdAt: '24 may 2026, 09:03',
   },
 ]

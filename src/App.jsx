@@ -13,6 +13,7 @@ import Alertas from './views/Alertas'
 import Configuracion from './views/Configuracion'
 import SignInView from './views/SignInView'
 import PendingActivation from './views/PendingActivation'
+import HelpButton from './components/HelpButton'
 import AdminDashboard from './views/admin/AdminDashboard'
 import Solicitudes from './views/admin/Solicitudes'
 import TecnicosAdmin from './views/admin/TecnicosAdmin'
@@ -138,6 +139,8 @@ function App() {
             </div>
           </main>
           {toast && <Toast message={toast} />}
+          {/* Botón de ayuda flotante (aporte de Nico) — solo para clientes */}
+          {role === 'cliente' && <HelpButton />}
         </div>
         )}
       </SignedIn>
